@@ -1,0 +1,9 @@
+version: 1
+window_days: 180          # ignore likes/comments older than this
+half_life_days: 30        # exponential decay half-life h
+alpha_follow: 1.0         # weight per follow direction
+beta:
+  like: 0.5
+  comment: 1.0
+normalization: none       # none | sqrt_strength
+include_synthetic: true   # demo environment only
