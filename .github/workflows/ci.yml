@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: qauym
+          POSTGRES_PASSWORD: qauym
+          POSTGRES_DB: qauym_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U qauym" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+      valkey:
+        image: valkey/valkey:8
+        ports: ["6379:6379"]
+    env:
+      TEST_DATABASE_URL: postgresql+psycopg://qauym:qauym@localhost:5432/qauym_test
+      VALKEY_URL: redis://localhost:6379/0
+      GIT_SHA: ${{ github.sha }}
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install uv && uv pip install --system -r pyproject.toml --extra dev
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: mypy app analytics bench scripts
+      # Coverage is reported here; the 75% threshold is enforced from M2 (SPEC Section 10).
+      - run: pytest --cov=app --cov=analytics --cov-report=term-missing
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: make up
+      - run: make seed
+      - run: make analytics-run
+      - run: make e2e
+      - if: failure()
+        run: docker compose logs api web
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: frontend/test-results

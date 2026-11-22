@@ -221,3 +221,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Qauym
+.env
+node_modules/
+frontend/dist/
+frontend/test-results/
+frontend/playwright-report/
+data/
+.ruff_cache/
+.mypy_cache/
+evidence/raw/

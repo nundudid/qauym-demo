@@ -1,0 +1,16 @@
+{
+  "cpu_model": "Intel(R) Core(TM) i5-1035G1 CPU @ 1.00GHz",
+  "cores_physical": 4,
+  "cores_logical": 8,
+  "ram_gb": 3.7,
+  "os": "Linux-6.18.58.1-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+  "in_container": true,
+  "python": "3.12.16",
+  "igraph": "1.0.0",
+  "leidenalg": "0.12.0",
+  "networkx": "3.7",
+  "git_commit": "6cfd543",
+  "recorded_at": "2026-11-22T15:44:01+00:00",
+  "config": "bench/configs/m0.yaml",
+  "total_wall_s": 166.5
+}
